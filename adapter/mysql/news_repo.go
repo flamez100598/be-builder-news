@@ -2,39 +2,40 @@ package mysql
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 	"log"
-	"lykafe/news/core/data/model"
 	"lykafe/news/core/data/dto"
-	"time"
+	"lykafe/news/core/data/model"
 	"strings"
+	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type NewsRepo struct {
 	db *sql.DB
-	
-	getNewsByTag *sql.Stmt
-	getNewsByTagCount *sql.Stmt
-	getListFeaturedNews *sql.Stmt
-	getNewsBySlug *sql.Stmt
-	getNewsById *sql.Stmt
-	getNewsByCategory *sql.Stmt
-	getNewsByCategoryNotIncludeSubs  *sql.Stmt
-	getNewsBySubCategory *sql.Stmt
-	adminSearchNews *sql.Stmt
-	adminSearchNewsCount *sql.Stmt
-	adminSearchRelatedNews *sql.Stmt
-	adminSearchRelatedNewsCount *sql.Stmt
-	searchNews *sql.Stmt
-	searchNewsCount *sql.Stmt
-	getRelatedNews *sql.Stmt
-	getNewsTags *sql.Stmt
-	getTagsNews *sql.Stmt
-	getTagsNewsCount *sql.Stmt
-	reorderFeatured *sql.Stmt
-	getFeaturedOrder *sql.Stmt
-	setFeaturedOrder *sql.Stmt
-	getNewsUrl *sql.Stmt
+
+	getNewsByTag                    *sql.Stmt
+	getNewsByTagCount               *sql.Stmt
+	getListFeaturedNews             *sql.Stmt
+	getNewsBySlug                   *sql.Stmt
+	getNewsById                     *sql.Stmt
+	getNewsByCategory               *sql.Stmt
+	getNewsByCategoryNotIncludeSubs *sql.Stmt
+	getNewsBySubCategory            *sql.Stmt
+	adminSearchNews                 *sql.Stmt
+	adminSearchNewsCount            *sql.Stmt
+	adminSearchRelatedNews          *sql.Stmt
+	adminSearchRelatedNewsCount     *sql.Stmt
+	searchNews                      *sql.Stmt
+	searchNewsCount                 *sql.Stmt
+	getRelatedNews                  *sql.Stmt
+	getNewsTags                     *sql.Stmt
+	getTagsNews                     *sql.Stmt
+	getTagsNewsCount                *sql.Stmt
+	reorderFeatured                 *sql.Stmt
+	getFeaturedOrder                *sql.Stmt
+	setFeaturedOrder                *sql.Stmt
+	getNewsUrl                      *sql.Stmt
 }
 
 func NewNewsRepo() *NewsRepo {
@@ -52,11 +53,11 @@ func NewNewsRepo() *NewsRepo {
 	if err != nil {
 		log.Fatal("[DEBUG] Cannot prepare getListFeaturedNews ", err)
 	}
-	getNewsBySlug, err := db.Prepare("SELECT HEX(n.`id`), `title`, `content`, `description`, `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE slug=? AND n.published_at <= NOW() AND n.status <> 3")
+	getNewsBySlug, err := db.Prepare("SELECT HEX(n.`id`), `title`, `content`, `content_jp`, `description`, `description_jp`, `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE slug=? AND n.published_at <= NOW() AND n.status <> 3")
 	if err != nil {
 		log.Fatal("[DEBUG] Cannot prepare getNewsBySlug ", err)
 	}
-	getNewsById, err := db.Prepare("SELECT HEX(n.`id`), `title`, `content`, `description`, `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE n.`id`=UNHEX(?)")
+	getNewsById, err := db.Prepare("SELECT HEX(n.`id`), `title`, `content`, `content_jp`, `description`, `description_jp`, `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE n.`id`=UNHEX(?)")
 	if err != nil {
 		log.Fatal("[DEBUG] Cannot prepare getNewsById ", err)
 	}
@@ -145,51 +146,51 @@ func NewNewsRepo() *NewsRepo {
 		log.Fatal("[DEBUG] Cannot prepare getNewsUrl ", err)
 	}
 
-	return &NewsRepo {
+	return &NewsRepo{
 		db: db,
 
-		getNewsByTag: getNewsByTag,
-		getNewsByTagCount: getNewsByTagCount,
-		getListFeaturedNews: getListFeaturedNews,
-		getNewsBySlug: getNewsBySlug,
-		getNewsById: getNewsById,
-		getNewsByCategory: getNewsByCategory,
+		getNewsByTag:                    getNewsByTag,
+		getNewsByTagCount:               getNewsByTagCount,
+		getListFeaturedNews:             getListFeaturedNews,
+		getNewsBySlug:                   getNewsBySlug,
+		getNewsById:                     getNewsById,
+		getNewsByCategory:               getNewsByCategory,
 		getNewsByCategoryNotIncludeSubs: getNewsByCategoryNotIncludeSubs,
-		getNewsBySubCategory: getNewsBySubCategory,
-		adminSearchNews: adminSearchNews,
-		adminSearchNewsCount: adminSearchNewsCount,
-		adminSearchRelatedNews: adminSearchRelatedNews,
-		adminSearchRelatedNewsCount: adminSearchRelatedNewsCount,
-		searchNews: searchNews,
-		searchNewsCount: searchNewsCount,
-		getRelatedNews: getRelatedNews,
-		getNewsTags: getNewsTags,
-		getTagsNews: getTagsNews,
-		getTagsNewsCount: getTagsNewsCount,
-		reorderFeatured: reorderFeatured,
-		getFeaturedOrder: getFeaturedOrder,
-		setFeaturedOrder: setFeaturedOrder,
-		getNewsUrl: getNewsUrl,
+		getNewsBySubCategory:            getNewsBySubCategory,
+		adminSearchNews:                 adminSearchNews,
+		adminSearchNewsCount:            adminSearchNewsCount,
+		adminSearchRelatedNews:          adminSearchRelatedNews,
+		adminSearchRelatedNewsCount:     adminSearchRelatedNewsCount,
+		searchNews:                      searchNews,
+		searchNewsCount:                 searchNewsCount,
+		getRelatedNews:                  getRelatedNews,
+		getNewsTags:                     getNewsTags,
+		getTagsNews:                     getTagsNews,
+		getTagsNewsCount:                getTagsNewsCount,
+		reorderFeatured:                 reorderFeatured,
+		getFeaturedOrder:                getFeaturedOrder,
+		setFeaturedOrder:                setFeaturedOrder,
+		getNewsUrl:                      getNewsUrl,
 	}
 }
 
 func (n *NewsRepo) PublishNews(req *dto.PublishNewsReq) (*model.News, error) {
 	tx, err := n.db.Begin()
-  if err != nil {
+	if err != nil {
 		log.Println("[DEBUG] PublishNews begin tx err: ", err)
-    return nil, err
-  }
+		return nil, err
+	}
 	txn := NewTxn(tx)
 	id, err := txn.PublishNews(req)
 	if err != nil {
 		return nil, err
 	}
-  return &model.News{
-		Id: id,
-		Title: req.Title,
-		Content: req.Content,
+	return &model.News{
+		Id:        id,
+		Title:     req.Title,
+		Content:   req.Content,
 		PublishBy: req.PublishBy,
-		Slug: req.Slug,
+		Slug:      req.Slug,
 	}, nil
 }
 
@@ -198,16 +199,16 @@ func (n *NewsRepo) EditNewsPost(req *dto.PublishNewsReq) (*model.News, error) {
 	newsTags, err := n.GetNewsTags(req.Id)
 	newsFeaturedOrder, err := n.GetFeaturedOrder(req.Id)
 	tx, err := n.db.Begin()
-  if err != nil {
+	if err != nil {
 		log.Println("[DEBUG] EditNewsPost begin tx err: ", err)
-    return nil, err
-  }
+		return nil, err
+	}
 	txn := NewTxn(tx)
 	err = txn.EditNews(news, newsTags, newsFeaturedOrder, req)
 	if err != nil {
 		return nil, err
 	}
-  return &model.News{
+	return &model.News{
 		Id: req.Id,
 	}, nil
 	return nil, nil
@@ -216,21 +217,21 @@ func (n *NewsRepo) EditNewsPost(req *dto.PublishNewsReq) (*model.News, error) {
 func (n *NewsRepo) DeleteNewsPost(id string) (*model.News, error) {
 	newsFeaturedOrder, err := n.GetFeaturedOrder(id)
 	tx, err := n.db.Begin()
-  if err != nil {
+	if err != nil {
 		log.Println("[DEBUG] DeleteNewsPost begin tx err: ", err)
-    return nil, err
-  }
+		return nil, err
+	}
 	txn := NewTxn(tx)
 	err = txn.DeleteNews(id, newsFeaturedOrder)
 	if err != nil {
 		return nil, err
 	}
-  return &model.News{
+	return &model.News{
 		Id: id,
 	}, nil
 }
 
-func (n *NewsRepo) GetFeaturedNews()  ([]*model.NewsView, error) {
+func (n *NewsRepo) GetFeaturedNews() ([]*model.NewsView, error) {
 	rows, err := n.getListFeaturedNews.Query()
 	if err != nil {
 		log.Println("[DEBUG] getListFeaturedNews err: ", err)
@@ -292,7 +293,7 @@ func (n *NewsRepo) GetNewsCategory(includeSubs bool, id, offset, limit int) ([]*
 	if !includeSubs {
 		stmt = n.getNewsByCategoryNotIncludeSubs
 	}
-	rows, err :=stmt.Query(id, offset, limit)
+	rows, err := stmt.Query(id, offset, limit)
 	if err != nil {
 		log.Println("[DEBUG] GetNewsCategory err: ", err)
 		return nil, err
@@ -341,7 +342,7 @@ func (n *NewsRepo) GetNewsSubCategory(id, offset, limit int) ([]*model.NewsView,
 	return listNewsView, err
 }
 
-func (n *NewsRepo) AdminSearchNews(req *dto.AdminSearchNewsReq)  ([]*model.NewsView, error) {
+func (n *NewsRepo) AdminSearchNews(req *dto.AdminSearchNewsReq) ([]*model.NewsView, error) {
 	var from *time.Time = nil
 	var to *time.Time = nil
 	if !req.From.IsZero() {
@@ -384,7 +385,7 @@ func (n *NewsRepo) AdminSearchNews(req *dto.AdminSearchNewsReq)  ([]*model.NewsV
 		nv.AvatarUpdateBy = updatedByAvatar.String
 		nv.NameUpdateBy = updatedByName.String
 		if err != nil {
-			log.Println("	time.Parse err", 	err)
+			log.Println("	time.Parse err", err)
 		}
 		listNewsView = append(listNewsView, &nv)
 	}
@@ -436,7 +437,7 @@ func (n *NewsRepo) AdminSearchRelatedNews(req *dto.AdminSearchRelatedNewsReq) ([
 		nv.UpdatedAt, _ = time.Parse("2006-01-02 15:04:05", string(updatedAt))
 		nv.PublishedAt, _ = time.Parse("2006-01-02 15:04:05", string(publishedAt))
 		if err != nil {
-			log.Println("	time.Parse err", 	err)
+			log.Println("	time.Parse err", err)
 		}
 		listNewsView = append(listNewsView, &nv)
 	}
@@ -459,7 +460,7 @@ func (n *NewsRepo) AdminSearchRelatedNewsCount(req *dto.AdminSearchRelatedNewsRe
 	return c, err
 }
 
-func (n *NewsRepo) SearchNews(req *dto.SearchNewsReq)  ([]*model.NewsView, error) {
+func (n *NewsRepo) SearchNews(req *dto.SearchNewsReq) ([]*model.NewsView, error) {
 	rows, err := n.searchNews.Query(req.Keywords, req.Keywords, req.Offset, req.Limit)
 	if err != nil {
 		log.Println("[DEBUG] searchNews err: ", err)
@@ -480,7 +481,7 @@ func (n *NewsRepo) SearchNews(req *dto.SearchNewsReq)  ([]*model.NewsView, error
 		nv.UpdatedAt, _ = time.Parse("2006-01-02 15:04:05", string(updatedAt))
 		nv.PublishedAt, _ = time.Parse("2006-01-02 15:04:05", string(publishedAt))
 		if err != nil {
-			log.Println("	time.Parse err", 	err)
+			log.Println("	time.Parse err", err)
 		}
 		listNewsView = append(listNewsView, &nv)
 	}
@@ -518,7 +519,7 @@ func (n *NewsRepo) GetNewsByTag(tag string, offset, limit int, includeDeleted bo
 		nv.UpdatedAt, _ = time.Parse("2006-01-02 15:04:05", string(updatedAt))
 		nv.PublishedAt, _ = time.Parse("2006-01-02 15:04:05", string(publishedAt))
 		if err != nil {
-			log.Println("	time.Parse err", 	err)
+			log.Println("	time.Parse err", err)
 		}
 		listNewsView = append(listNewsView, &nv)
 	}
@@ -556,7 +557,7 @@ func (n *NewsRepo) GetRelatedNews(id string) ([]*model.NewsView, error) {
 		nv.UpdatedAt, _ = time.Parse("2006-01-02 15:04:05", string(updatedAt))
 		nv.PublishedAt, _ = time.Parse("2006-01-02 15:04:05", string(publishedAt))
 		if err != nil {
-			log.Println("	time.Parse err", 	err)
+			log.Println("	time.Parse err", err)
 		}
 		listNewsView = append(listNewsView, &nv)
 	}
@@ -611,12 +612,12 @@ func (n *NewsRepo) GetTagsNewsCount(tag string) (int, error) {
 
 func (n *NewsRepo) ReorderFeatured(req []*dto.NewsOrder) ([]*dto.NewsOrder, error) {
 	for _, o := range req {
-		_, err := n.reorderFeatured.Exec(o.Order, o.Id ) 
-  	if err != nil {
+		_, err := n.reorderFeatured.Exec(o.Order, o.Id)
+		if err != nil {
 			log.Println("[DEBUG] ReorderFeatured err: ", err)
 			return nil, err
 		}
-  }
+	}
 	return req, nil
 }
 
@@ -630,7 +631,7 @@ func (n *NewsRepo) GetFeaturedOrder(newsId string) (int, error) {
 }
 
 func (n *NewsRepo) SetFeaturedOrder(newsId string, order int) error {
-	_, err := n.setFeaturedOrder.Exec(order, newsId ) 
+	_, err := n.setFeaturedOrder.Exec(order, newsId)
 	if err != nil {
 		log.Println("[DEBUG] SetFeaturedOrder err: ", err)
 	}

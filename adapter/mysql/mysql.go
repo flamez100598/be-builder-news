@@ -2,10 +2,11 @@ package mysql
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"log"
 	"lykafe/news/config"
 	"strings"
-	"log"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
@@ -16,9 +17,11 @@ func init() {
 	if err != nil {
 		log.Fatal("[DEBUG] Cannot connect to mysql", err)
 	}
+
+	migrate(db)
 }
 
-func connect() (*sql.DB, error){
+func connect() (*sql.DB, error) {
 	var sb strings.Builder
 	sb.WriteString(config.EnvMysqlUser())
 	sb.WriteString(":")
@@ -36,4 +39,16 @@ func connect() (*sql.DB, error){
 		panic(err)
 	}
 	return db, err
+}
+
+func migrate(db *sql.DB) {
+	// check column `content_jp` exists, if not, add it
+	if _, err := db.Exec(`ALTER TABLE news ADD COLUMN content_jp TEXT NULL AFTER content`); err != nil {
+		// ignore error
+	}
+
+	// check column `description_js` exists, if not, add it
+	if _, err := db.Exec(`ALTER TABLE news ADD COLUMN description_jp TEXT NULL AFTER description`); err != nil {
+		// ignore error
+	}
 }
