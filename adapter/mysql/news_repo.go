@@ -261,7 +261,7 @@ func (n *NewsRepo) GetNewsBySlug(slug string) (*model.NewsView, error) {
 	var updatedAt []uint8
 	var publishedAt []uint8
 	nv := model.NewsView{}
-	err := n.getNewsBySlug.QueryRow(slug).Scan(&nv.Id, &nv.Title, &nv.Content, &nv.ContentJp, &nv.Content, &nv.Description, &nv.DescriptionJp, &nv.ImgUrl, &nv.MetaKw, &nv.MetaDesc, &nv.Slug, &nv.Category, &nv.SubCategory, &nv.CommentNum, &nv.VoteNum, &nv.ViewNum, &nv.Status, &nv.PublishBy, &nv.Ranking, &createdAt, &updatedAt, &publishedAt, &nv.UsernamePublishBy, &nv.NamePublishBy, &nv.AvatarPublishBy)
+	err := n.getNewsBySlug.QueryRow(slug).Scan(&nv.Id, &nv.Title, &nv.Content, &nv.ContentJp, &nv.Description, &nv.DescriptionJp, &nv.ImgUrl, &nv.MetaKw, &nv.MetaDesc, &nv.Slug, &nv.Category, &nv.SubCategory, &nv.CommentNum, &nv.VoteNum, &nv.ViewNum, &nv.Status, &nv.PublishBy, &nv.Ranking, &createdAt, &updatedAt, &publishedAt, &nv.UsernamePublishBy, &nv.NamePublishBy, &nv.AvatarPublishBy)
 	if err != nil {
 		log.Println("[DEBUG] GetNewsBySlug err: ", err)
 		return nil, err
