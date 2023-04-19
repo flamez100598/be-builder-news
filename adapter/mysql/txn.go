@@ -2,12 +2,13 @@ package mysql
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 	"log"
-	"time"
-	"lykafe/news/lib"
 	"lykafe/news/core/data/dto"
 	"lykafe/news/core/data/model"
+	"lykafe/news/lib"
+	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Txn struct {
@@ -27,7 +28,7 @@ const MaxNumberTrendingPosts = 31
 func (this *Txn) PublishNews(req *dto.PublishNewsReq) (string, error) {
 	commit := false
 	defer this.close(&commit)
-	id, err := this.insertNews(req.Title, req.Content, req.Description, req.ImgUrl, req.MetaKw, req.MetaDesc, req.Slug, req.Category, req.SubCategory, req.AuthorId,  req.PublishAt)
+	id, err := this.insertNews(req.Title, req.Content, req.ContentJp, req.Description, req.DescriptionJp, req.ImgUrl, req.MetaKw, req.MetaDesc, req.Slug, req.Category, req.SubCategory, req.AuthorId, req.PublishAt)
 	if err != nil {
 		return id, err
 	}
@@ -107,7 +108,7 @@ func (this *Txn) EditNews(
 	req *dto.PublishNewsReq) error {
 	commit := false
 	defer this.close(&commit)
-	err := this.updateNews(req.Id, req.Title, req.Content, req.Description, req.ImgUrl, req.MetaKw, req.MetaDesc, req.Slug, req.Category, req.SubCategory, req.AuthorId, req.PublishBy, req.PublishAt)
+	err := this.updateNews(req.Id, req.Title, req.Content, req.ContentJp, req.Description, req.DescriptionJp, req.ImgUrl, req.MetaKw, req.MetaDesc, req.Slug, req.Category, req.SubCategory, req.AuthorId, req.PublishBy, req.PublishAt)
 	if err != nil {
 		return err
 	}
@@ -175,7 +176,6 @@ func (this *Txn) EditNews(
 		}
 	}
 
-
 	// if req.IsFeatured {
 	// 	err = this.increaseAllFeaturedOrder(newsFeaturedOrder)
 	// 	if err != nil {
@@ -212,7 +212,7 @@ func (this *Txn) DeleteNews(newsId string, newsFeaturedOrder int) error {
 	if err != nil {
 		return err
 	}
-	if (newsFeaturedOrder < MaxNumberFeaturedPosts) {
+	if newsFeaturedOrder < MaxNumberFeaturedPosts {
 		err = this.decreaseAllFeaturedOrder(newsFeaturedOrder)
 		if err != nil {
 			return err
@@ -222,18 +222,18 @@ func (this *Txn) DeleteNews(newsId string, newsFeaturedOrder int) error {
 	return err
 }
 
-func (this *Txn)  ReorderCategories(categories []*model.Category) error {
+func (this *Txn) ReorderCategories(categories []*model.Category) error {
 	commit := false
 	defer this.close(&commit)
 	reorderCategorySql := "UPDATE category set `order`=? WHERE `id`=?"
 	stmt, err := this.tx.Prepare(reorderCategorySql)
-  if err != nil {
+	if err != nil {
 		log.Println("[DEBUG] tx Prepare reorderCategorySql err: ", err)
-    return err
-  }
-  defer stmt.Close()
+		return err
+	}
+	defer stmt.Close()
 	for _, category := range categories {
-		_, err = stmt.Exec(category.Order, category.Id) 
+		_, err = stmt.Exec(category.Order, category.Id)
 		if err != nil {
 			log.Println("[DEBUG] tx Exec reorderCategorySql err: ", err)
 			return err
@@ -244,18 +244,18 @@ func (this *Txn)  ReorderCategories(categories []*model.Category) error {
 }
 
 func (this *Txn) close(commit *bool) {
-  if *commit {
-    if err := this.tx.Commit(); err != nil {
-      log.Println("Commit sql transaction err: ", err)
-    }
-  } else {
-    if err := this.tx.Rollback(); err != nil {
-      log.Println("Rollback sql transcation err: ", err)
-    }
-  }
+	if *commit {
+		if err := this.tx.Commit(); err != nil {
+			log.Println("Commit sql transaction err: ", err)
+		}
+	} else {
+		if err := this.tx.Rollback(); err != nil {
+			log.Println("Rollback sql transcation err: ", err)
+		}
+	}
 }
 
-func (this *Txn) exec(cmdSql string, params ... any) error {
+func (this *Txn) exec(cmdSql string, params ...any) error {
 	stmt, err := this.tx.Prepare(cmdSql)
 	if err != nil {
 		log.Println("[DEBUG] txn Prepare: ", cmdSql, " err: ", err)
@@ -270,40 +270,40 @@ func (this *Txn) exec(cmdSql string, params ... any) error {
 	return nil
 }
 
-func (this *Txn)  insertNews(title, content, description, imgUrl, metaKw, metaDesc, slug string,
+func (this *Txn) insertNews(title, content, contentJp, description, descriptionJp, imgUrl, metaKw, metaDesc, slug string,
 	category, subCategory int,
 	publishBy string,
 	publishAt time.Time) (string, error) {
-	insertNewsSql := `INSERT INTO news(id, title, content, description, img_url, meta_kw, meta_desc, slug,
-		category, sub_category, publish_by, published_at) VALUES(UNHEX(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, UNHEX(?),?)`
+	insertNewsSql := `INSERT INTO news(id, title, content, content_jp, description, description_jp, img_url, meta_kw, meta_desc, slug,
+		category, sub_category, publish_by, published_at) VALUES(UNHEX(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNHEX(?),?)`
 	id, err := lib.OrderedUuidV1()
 	if err != nil {
 		log.Println("[DEBUG] PublishNews cannot OrderedUuidV1: ", err)
 		return "", err
 	}
-  err = this.exec(insertNewsSql, id, title, content, description, imgUrl, metaKw, metaDesc, slug, category, subCategory, publishBy,  publishAt)
+	err = this.exec(insertNewsSql, id, title, content, contentJp, description, descriptionJp, imgUrl, metaKw, metaDesc, slug, category, subCategory, publishBy, publishAt)
 	return id, err
 }
 
-func (this *Txn)  updateNews(id, title, content, description, imgUrl, metaKw, metaDesc, slug string,
+func (this *Txn) updateNews(id, title, content, contentJp, description, descriptionJp, imgUrl, metaKw, metaDesc, slug string,
 	category, subCategory int,
 	authorId, publishBy string,
 	publishAt time.Time) error {
-	updateNewsSql := `UPDATE news SET title = ?, content = ?, description = ?, img_url = ?, meta_kw = ?, meta_desc = ?, slug = ?,
+	updateNewsSql := `UPDATE news SET title = ?, content = ?, content_jp = ?, description = ?, description_jp = ?, img_url = ?, meta_kw = ?, meta_desc = ?, slug = ?,
 		category = ?, sub_category = ?, published_at = ?, publish_by=UNHEX(?), updated_by=UNHEX(?), updated_at=NOW(), status = 0 WHERE id = UNHEX(?)`
-  return this.exec(updateNewsSql, title, content, description, imgUrl, metaKw, metaDesc, slug, category, subCategory, publishAt, authorId, publishBy, id)
+	return this.exec(updateNewsSql, title, content, contentJp, description, descriptionJp, imgUrl, metaKw, metaDesc, slug, category, subCategory, publishAt, authorId, publishBy, id)
 }
 
-func (this *Txn)  upsertTagsCount(tags []string) error {
+func (this *Txn) upsertTagsCount(tags []string) error {
 	upsertTagCountSql := `INSERT INTO tag(name, count) VALUES(?, 1) ON DUPLICATE KEY UPDATE count = count + 1`
 	stmt, err := this.tx.Prepare(upsertTagCountSql)
-  if err != nil {
+	if err != nil {
 		log.Println("[DEBUG] tx Prepare upsertTagCountSql err: ", err)
-    return err
-  }
-  defer stmt.Close()
+		return err
+	}
+	defer stmt.Close()
 	for _, tag := range tags {
-		_, err = stmt.Exec(tag) 
+		_, err = stmt.Exec(tag)
 		if err != nil {
 			log.Println("[DEBUG] tx Exec upsertTagCountSql err: ", err)
 			return err
@@ -312,16 +312,16 @@ func (this *Txn)  upsertTagsCount(tags []string) error {
 	return nil
 }
 
-func (this *Txn)  decreaseTagsCount(tags []string) error {
+func (this *Txn) decreaseTagsCount(tags []string) error {
 	decreaseTagCountSql := "UPDATE tag SET `count` = `count` - 1 WHERE `name` = ?"
 	stmt, err := this.tx.Prepare(decreaseTagCountSql)
-  if err != nil {
+	if err != nil {
 		log.Println("[DEBUG] tx Prepare decreaseTagCountSql err: ", err)
-    return err
-  }
-  defer stmt.Close()
+		return err
+	}
+	defer stmt.Close()
 	for _, tag := range tags {
-		_, err = stmt.Exec(tag) 
+		_, err = stmt.Exec(tag)
 		if err != nil {
 			log.Println("[DEBUG] tx Exec decreaseTagCountSql err: ", err)
 			return err
@@ -330,22 +330,22 @@ func (this *Txn)  decreaseTagsCount(tags []string) error {
 	return nil
 }
 
-func (this *Txn)  deleteNewsTags(newsId string) error {
+func (this *Txn) deleteNewsTags(newsId string) error {
 	deleteNewsTagsSql := "DELETE FROM news_tag WHERE news_id=UNHEX(?)"
 	return this.exec(deleteNewsTagsSql, newsId)
 }
 
-func (this *Txn)  insertNewsTags(newsId string, tags []string) error {
+func (this *Txn) insertNewsTags(newsId string, tags []string) error {
 	insertNewsTagSql := `INSERT INTO news_tag(id, news_id, tag_name) VALUES(UNHEX(?), UNHEX(?), ?) `
 	stmt, err := this.tx.Prepare(insertNewsTagSql)
-  if err != nil {
+	if err != nil {
 		log.Println("[DEBUG] PublishNews tx Prepare insertNewsTagSql err: ", err)
-    return err
-  }
-  defer stmt.Close()
+		return err
+	}
+	defer stmt.Close()
 	for _, tag := range tags {
 		id, _ := lib.OrderedUuidV1()
-		_, err = stmt.Exec(id, newsId, tag) 
+		_, err = stmt.Exec(id, newsId, tag)
 		if err != nil {
 			log.Println("[DEBUG] PublishNews tx Exec insertNewsTagSql err: ", err)
 			return err
@@ -354,42 +354,42 @@ func (this *Txn)  insertNewsTags(newsId string, tags []string) error {
 	return nil
 }
 
-func (this *Txn)  increaseCategoryCount(catId int) error {
-	if (catId == 0) {
+func (this *Txn) increaseCategoryCount(catId int) error {
+	if catId == 0 {
 		return nil
 	}
 	increaseCategoryCountSql := "UPDATE category SET news_count = news_count + 1 WHERE id = ?"
 	return this.exec(increaseCategoryCountSql, catId)
 }
 
-func (this *Txn)  decreaseCategoryCount(catId int) error {
-	if (catId == 0) {
+func (this *Txn) decreaseCategoryCount(catId int) error {
+	if catId == 0 {
 		return nil
 	}
 	decreaseCategoryCountSql := "UPDATE category SET news_count = news_count -1 WHERE id = ?"
 	return this.exec(decreaseCategoryCountSql, catId)
 }
 
-func (this *Txn)  deleteRelated(newsId string) error {
+func (this *Txn) deleteRelated(newsId string) error {
 	deleteRelatedSql := "DELETE FROM related WHERE news_id = UNHEX(?)"
 	return this.exec(deleteRelatedSql, newsId)
 }
 
-func (this *Txn)  insertRelated(newsId string, related []string) error {
+func (this *Txn) insertRelated(newsId string, related []string) error {
 	insertRelatedSql := "INSERT INTO related(id, news_id, related_id) VALUES(UNHEX(?), UNHEX(?), UNHEX(?))"
 	stmt, err := this.tx.Prepare(insertRelatedSql)
-  if err != nil {
+	if err != nil {
 		log.Println("[DEBUG] PublishNews tx Prepare insertRelatedSql err: ", err)
-    return err
-  }
-  defer stmt.Close()
+		return err
+	}
+	defer stmt.Close()
 	for _, rel := range related {
 		relId, err := lib.OrderedUuidV1()
 		if err != nil {
 			log.Println("[DEBUG] PublishNews cannot OrderedUuidV1: ", err)
 			return err
 		}
-		_, err = stmt.Exec(relId, newsId, rel) 
+		_, err = stmt.Exec(relId, newsId, rel)
 		if err != nil {
 			log.Println("[DEBUG] PublishNews tx Exec insertRelatedSql err: ", err)
 			return err
@@ -398,70 +398,68 @@ func (this *Txn)  insertRelated(newsId string, related []string) error {
 	return nil
 }
 
-func (this *Txn)  increaseAllFeaturedOrder(topThreshold int) error {
+func (this *Txn) increaseAllFeaturedOrder(topThreshold int) error {
 	increaseAllOrderFeaturedSql := "UPDATE featured SET `order` = `order` + 1 WHERE `order` < ?"
 	return this.exec(increaseAllOrderFeaturedSql, topThreshold)
 }
 
-func (this *Txn)  decreaseAllFeaturedOrder(bottomThreshold int) error {
+func (this *Txn) decreaseAllFeaturedOrder(bottomThreshold int) error {
 	decreaseAllOrderFeaturedSql := "UPDATE featured SET `order` = `order` - 1 WHERE `order` > ?"
 	return this.exec(decreaseAllOrderFeaturedSql, bottomThreshold)
 }
 
-func (this *Txn)  deleteBiggerFeatured() error {
+func (this *Txn) deleteBiggerFeatured() error {
 	deleteBiggerFeaturedSql := "DELETE FROM featured WHERE `order` > 15"
 	return this.exec(deleteBiggerFeaturedSql)
 }
 
-func (this *Txn)  insertFeatured(newsId string) error {
+func (this *Txn) insertFeatured(newsId string) error {
 	insertFeaturedSql := "INSERT INTO featured(news_id, `order`) VALUES(UNHEX(?), 1)"
 	return this.exec(insertFeaturedSql, newsId)
 }
 
-func (this *Txn)  increaseAllTrendingOrder(limit int) error {
+func (this *Txn) increaseAllTrendingOrder(limit int) error {
 	increaseAllOrderTrendingSql := "UPDATE trending SET `order` = `order` + 1 WHERE `order` < ?"
 	return this.exec(increaseAllOrderTrendingSql, limit)
 }
 
-func (this *Txn)  deleteBiggerTrending() error {
+func (this *Txn) deleteBiggerTrending() error {
 	deleteBiggerTrendingSql := "DELETE FROM trending WHERE `order` > 30"
 	return this.exec(deleteBiggerTrendingSql)
 }
 
-func (this *Txn)  insertTrending(newsId string) error {
+func (this *Txn) insertTrending(newsId string) error {
 	insertTrendingSql := "INSERT INTO trending(news_id, `order`) VALUES(UNHEX(?), 1)"
 	return this.exec(insertTrendingSql, newsId)
 }
 
-func (this *Txn)  increaseAllHotOrder(limit int) error {
+func (this *Txn) increaseAllHotOrder(limit int) error {
 	increaseAllOrderHotSql := "UPDATE hot SET `order` = `order` + 1 WHERE `order` < ?"
 	return this.exec(increaseAllOrderHotSql, limit)
 }
 
-func (this *Txn)  deleteBiggerHot() error {
+func (this *Txn) deleteBiggerHot() error {
 	deleteBiggerHotSql := "DELETE FROM hot WHERE `order` > 30"
 	return this.exec(deleteBiggerHotSql)
 }
 
-func (this *Txn)  insertHot(newsId string) error {
+func (this *Txn) insertHot(newsId string) error {
 	insertHotSql := "INSERT INTO hot(news_id, `order`) VALUES(UNHEX(?), 1)"
 	return this.exec(insertHotSql, newsId)
 }
 
-func (this *Txn)  updateNewsStatus(newsId string) error {
+func (this *Txn) updateNewsStatus(newsId string) error {
 	updateNewsStatusSql := "UPDATE news SET `status`=?  WHERE `id`=UNHEX(?)"
 	const DELETED_STATUS = 3
 	return this.exec(updateNewsStatusSql, DELETED_STATUS, newsId)
 }
 
-func (this *Txn)  deleteFeaturedNews(newsId string) error {
+func (this *Txn) deleteFeaturedNews(newsId string) error {
 	deleteFeaturedNewsSql := "DELETE FROM featured WHERE news_id=UNHEX(?)"
 	return this.exec(deleteFeaturedNewsSql, newsId)
 }
 
-func (this *Txn)  updateFeaturedOrder(newsId string, order int) error {
+func (this *Txn) updateFeaturedOrder(newsId string, order int) error {
 	updateFeaturedOrderSql := "UPDATE featured SET `order` = ? WHERE news_id=UNHEX(?)"
 	return this.exec(updateFeaturedOrderSql, order, newsId)
 }
-
-

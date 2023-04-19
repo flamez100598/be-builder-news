@@ -96,12 +96,12 @@ func NewNewsRepo() *NewsRepo {
 		log.Fatal("[DEBUG] Cannot prepare adminSearchRelatedNewsCount ", err)
 	}
 
-	searchNews, err := db.Prepare("SELECT HEX(n.`id`), `title`, `description`, `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE (n.title LIKE CONCAT('%', ?, '%') OR n.content LIKE CONCAT('%', ?, '%')) AND n.published_at <= NOW() AND n.status <> 3 ORDER BY n.id DESC LIMIT ?, ?")
+	searchNews, err := db.Prepare("SELECT HEX(n.`id`), `title`, `description`, `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE (n.title LIKE CONCAT('%', ?, '%') OR n.content LIKE CONCAT('%', ?, '%') OR n.content_jp LIKE CONCAT('%', ?, '%')) AND n.published_at <= NOW() AND n.status <> 3 ORDER BY n.id DESC LIMIT ?, ?")
 	if err != nil {
 		log.Fatal("[DEBUG] Cannot prepare searchNews ", err)
 	}
 
-	searchNewsCount, err := db.Prepare("SELECT COUNT(n.`id`) AS c FROM news as n WHERE (n.title LIKE CONCAT('%', ?, '%') OR n.content LIKE CONCAT('%', ?, '%')) AND n.published_at <= NOW() AND n.status <> 3")
+	searchNewsCount, err := db.Prepare("SELECT COUNT(n.`id`) AS c FROM news as n WHERE (n.title LIKE CONCAT('%', ?, '%') OR n.content LIKE CONCAT('%', ?, '%'), OR n.content_jp LIKE CONCAT('%', ?, '%')) AND n.published_at <= NOW() AND n.status <> 3")
 	if err != nil {
 		log.Fatal("[DEBUG] Cannot prepare searchNewsCount ", err)
 	}
@@ -189,6 +189,7 @@ func (n *NewsRepo) PublishNews(req *dto.PublishNewsReq) (*model.News, error) {
 		Id:        id,
 		Title:     req.Title,
 		Content:   req.Content,
+		ContentJp: req.ContentJp,
 		PublishBy: req.PublishBy,
 		Slug:      req.Slug,
 	}, nil
@@ -211,7 +212,6 @@ func (n *NewsRepo) EditNewsPost(req *dto.PublishNewsReq) (*model.News, error) {
 	return &model.News{
 		Id: req.Id,
 	}, nil
-	return nil, nil
 }
 
 func (n *NewsRepo) DeleteNewsPost(id string) (*model.News, error) {
@@ -261,7 +261,7 @@ func (n *NewsRepo) GetNewsBySlug(slug string) (*model.NewsView, error) {
 	var updatedAt []uint8
 	var publishedAt []uint8
 	nv := model.NewsView{}
-	err := n.getNewsBySlug.QueryRow(slug).Scan(&nv.Id, &nv.Title, &nv.Content, &nv.Description, &nv.ImgUrl, &nv.MetaKw, &nv.MetaDesc, &nv.Slug, &nv.Category, &nv.SubCategory, &nv.CommentNum, &nv.VoteNum, &nv.ViewNum, &nv.Status, &nv.PublishBy, &nv.Ranking, &createdAt, &updatedAt, &publishedAt, &nv.UsernamePublishBy, &nv.NamePublishBy, &nv.AvatarPublishBy)
+	err := n.getNewsBySlug.QueryRow(slug).Scan(&nv.Id, &nv.Title, &nv.Content, &nv.ContentJp, &nv.Content, &nv.Description, &nv.DescriptionJp, &nv.ImgUrl, &nv.MetaKw, &nv.MetaDesc, &nv.Slug, &nv.Category, &nv.SubCategory, &nv.CommentNum, &nv.VoteNum, &nv.ViewNum, &nv.Status, &nv.PublishBy, &nv.Ranking, &createdAt, &updatedAt, &publishedAt, &nv.UsernamePublishBy, &nv.NamePublishBy, &nv.AvatarPublishBy)
 	if err != nil {
 		log.Println("[DEBUG] GetNewsBySlug err: ", err)
 		return nil, err
@@ -277,7 +277,7 @@ func (n *NewsRepo) GetNewsById(id string) (*model.NewsView, error) {
 	var updatedAt []uint8
 	var publishedAt []uint8
 	nv := model.NewsView{}
-	err := n.getNewsById.QueryRow(id).Scan(&nv.Id, &nv.Title, &nv.Content, &nv.Description, &nv.ImgUrl, &nv.MetaKw, &nv.MetaDesc, &nv.Slug, &nv.Category, &nv.SubCategory, &nv.CommentNum, &nv.VoteNum, &nv.ViewNum, &nv.Status, &nv.PublishBy, &nv.Ranking, &createdAt, &updatedAt, &publishedAt, &nv.UsernamePublishBy, &nv.NamePublishBy, &nv.AvatarPublishBy)
+	err := n.getNewsById.QueryRow(id).Scan(&nv.Id, &nv.Title, &nv.Content, &nv.ContentJp, &nv.Description, &nv.DescriptionJp, &nv.ImgUrl, &nv.MetaKw, &nv.MetaDesc, &nv.Slug, &nv.Category, &nv.SubCategory, &nv.CommentNum, &nv.VoteNum, &nv.ViewNum, &nv.Status, &nv.PublishBy, &nv.Ranking, &createdAt, &updatedAt, &publishedAt, &nv.UsernamePublishBy, &nv.NamePublishBy, &nv.AvatarPublishBy)
 	if err != nil {
 		log.Println("[DEBUG] GetNewsById err: ", err)
 		return nil, err
@@ -371,7 +371,7 @@ func (n *NewsRepo) AdminSearchNews(req *dto.AdminSearchNewsReq) ([]*model.NewsVi
 		var updatedByName sql.NullString
 		var updatedByUsername sql.NullString
 		var updatedByAvatar sql.NullString
-		err = rows.Scan(&nv.Id, &nv.Title, &nv.Content, &nv.Description, &nv.ImgUrl, &nv.MetaKw, &nv.MetaDesc, &nv.Slug, &nv.Category, &nv.SubCategory, &nv.CommentNum, &nv.VoteNum, &nv.ViewNum, &nv.Status, &nv.PublishBy, &nv.Ranking, &createdAt, &updatedAt, &publishedAt, &publishByUsername, &publishByName, &publishByAvatar, &updatedByUsername, &updatedByName, &updatedByAvatar)
+		err = rows.Scan(&nv.Id, &nv.Title, &nv.Content, &nv.ContentJp, &nv.Description, &nv.DescriptionJp, &nv.ImgUrl, &nv.MetaKw, &nv.MetaDesc, &nv.Slug, &nv.Category, &nv.SubCategory, &nv.CommentNum, &nv.VoteNum, &nv.ViewNum, &nv.Status, &nv.PublishBy, &nv.Ranking, &createdAt, &updatedAt, &publishedAt, &publishByUsername, &publishByName, &publishByAvatar, &updatedByUsername, &updatedByName, &updatedByAvatar)
 		if err != nil {
 			return nil, err
 		}
