@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message NewsView {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string description = 4;
+  string imgUrl = 5;
+  string metaKw = 6;
+  string metaDesc = 7;
+  string slug = 8;
+  int32 category = 9;
+  int32 subCategory = 10;
+  int32 commentNum = 11;
+  int32 voteNum = 12;
+  int32 viewNum = 13;
+  int32 status = 14;
+  string publishBy = 15;
+  double ranking = 16;
+  string createdAt = 17;
+  string updatedAt = 18;
+  string publishedAt = 19;
+
+  int32 order = 20;
+  string usernamePublishBy = 21;
+  string namePublishBy = 22;
+  string avatarPublishBy = 23;
+
+  string usernameUpdateBy = 24;
+  string nameUpdateBy = 25;
+  string avatarUpdateBy = 26;
+}

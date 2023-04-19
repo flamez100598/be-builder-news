@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message NewsOrder {
+  string id = 1;
+  int32 order = 2;
+}
+
+message NewsOrders {
+  repeated NewsOrder orders = 1;
+}
+
+message NewsOrdersResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated NewsOrder orders = 3;
+}

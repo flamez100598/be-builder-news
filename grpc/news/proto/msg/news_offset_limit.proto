@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message NewsOffsetLimit {
+  int32 offset = 1;
+  int32 limit = 2;
+}

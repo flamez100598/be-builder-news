@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+import "grpc/news/proto/msg/news_count_resp.proto";
+import "grpc/news/proto/msg/subscription.proto";
+import "grpc/news/proto/msg/contact.proto";
+import "grpc/news/proto/msg/news_email.proto";
+import "grpc/news/proto/msg/page_content.proto";
+
+service SubscriptionService {
+  rpc Subscribe (NewsEmail) returns (SubscriptionResp) {}
+  rpc SearchSubscription (SearchSubscriptionReq) returns (SubscriptionsResp) {}
+  rpc SearchSubscriptionCount (SearchSubscriptionReq) returns (NewsCountResp) {}
+  rpc DeleteSubscription (NewsEmail) returns (SubscriptionResp) {}
+  rpc SendContact (ContactReq) returns (ContactResp) {}
+  rpc SearchContact (ContactReq) returns (ContactsResp) {}
+  rpc SearchContactCount (ContactReq) returns (NewsCountResp) {}
+  rpc GetPageContent (PageContentReq) returns (PageContentResp) {}
+  rpc UpdatePageContent (PageContentReq) returns (PageContentResp) {}
+}

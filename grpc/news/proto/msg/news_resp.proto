@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+import "grpc/news/proto/msg/news.proto";
+
+message NewsResp {
+  int32 code = 1;
+  string msg = 2;
+  News news = 3;
+}
+

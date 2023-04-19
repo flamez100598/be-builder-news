@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message AdminSearchNewsReq {
+  string title = 1;
+  string content = 2;
+  int32 category = 3;
+  int32 sub_category = 4;
+  string description = 5;
+  string publishBy = 6;
+  string updateBy = 7;
+  string from = 8;
+  string to = 9;
+  int32 status = 10;
+  int32 offset = 11;
+  int32 limit = 12;
+}

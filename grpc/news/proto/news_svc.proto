@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+import "grpc/news/proto/msg/news_empty.proto";
+import "grpc/news/proto/msg/category.proto";
+import "grpc/news/proto/msg/publish_news.proto";
+import "grpc/news/proto/msg/news_resp.proto";
+import "grpc/news/proto/msg/news_view_resp.proto";
+import "grpc/news/proto/msg/slug.proto";
+import "grpc/news/proto/msg/news_category_req.proto";
+import "grpc/news/proto/msg/admin_search_news.proto";
+import "grpc/news/proto/msg/admin_search_related_news.proto";
+import "grpc/news/proto/msg/news_count_resp.proto";
+import "grpc/news/proto/msg/search_news.proto";
+import "grpc/news/proto/msg/news_tags.proto";
+import "grpc/news/proto/msg/news_id.proto";
+import "grpc/news/proto/msg/news_id_int.proto";
+import "grpc/news/proto/msg/news_order.proto";
+import "grpc/news/proto/msg/tag_news.proto";
+import "grpc/news/proto/msg/news_url.proto";
+
+service NewsService {
+  rpc GetAllCategories (NewsEmpty) returns (CategoriesResp) {}
+  rpc NewCategory (Category) returns (CategoryResp) {}
+  rpc EditCategory (Category) returns (CategoryResp) {}
+  rpc DeleteCategory (NewsIdInt) returns (CategoryResp) {}
+  rpc UndeleteCategory (NewsIdInt) returns (CategoryResp) {}
+  rpc ReorderCategories (CategoriesReq) returns (CategoriesResp) {}
+  rpc PublishNews (PublishNewsReq) returns (NewsResp) {}
+  rpc EditNews (PublishNewsReq) returns (NewsResp) {}
+  rpc DeleteNewsPost (NewsId) returns (NewsResp) {}
+  rpc GetFeaturedNews (NewsEmpty) returns (ListNewsViewResp) {}
+  rpc GetNewsBySlug (Slug) returns (NewsViewResp) {}
+  rpc GetNewsById (NewsId) returns (NewsViewResp) {}
+  rpc GetNewsCategory (NewsCategoryReq) returns (ListNewsViewResp) {}
+  rpc GetNewsSubCategory (NewsCategoryReq) returns (ListNewsViewResp) {}
+  rpc AdminSearchNews (AdminSearchNewsReq) returns (ListNewsViewResp) {}
+  rpc AdminSearchNewsCount (AdminSearchNewsReq) returns (NewsCountResp) {}
+  rpc AdminSearchRelatedNews (AdminSearchRelatedNewsReq) returns (ListNewsViewResp) {}
+  rpc AdminSearchRelatedNewsCount (AdminSearchRelatedNewsReq) returns (NewsCountResp) {}
+  rpc SearchNews (SearchNewsReq) returns (ListNewsViewResp) {}
+  rpc SearchNewsCount (SearchNewsReq) returns (NewsCountResp) {}
+  rpc GetNewsByTag (NewsTagReq) returns (ListNewsViewResp) {}
+  rpc GetNewsByTagCount (NewsTagReq) returns (NewsCountResp) {}
+  rpc GetRelatedNews (NewsId) returns (ListNewsViewResp) {}
+  rpc GetNewsTags (NewsId) returns (NewsTagsResp) {} //get tags of a news
+  rpc GetTagsNews (NewsTagReq) returns (TagNewsResp) {} // get list tags
+  rpc GetTagsNewsCount (NewsTagReq) returns (NewsCountResp) {} // get list tags count
+  rpc ReorderFeatured (NewsOrders) returns (NewsOrdersResp) {}
+  rpc GetAllNewsUrls (NewsEmpty) returns (NewsUrlsResp) {}
+}

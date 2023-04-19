@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message PageContent {
+  int32 id = 1;
+  string title = 2;
+  string content = 3;
+  string updatedAt = 4;
+  string UsernameUpdatedBy = 5;
+  string NameUpdatedBy = 6;
+  string EmailUpdatedBy = 7;
+  string AvatarUpdatedBy = 8;
+}
+
+message PageContentReq {
+  int32 id = 1;
+  string content = 2;
+  string updatedBy = 3;
+  string page = 4; // about_us career newsletter
+}
+
+message PageContentResp {
+  int32 code = 1;
+  string msg = 2;
+  PageContent pageContent = 3;
+}

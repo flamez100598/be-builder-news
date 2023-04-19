@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message NewsId {
+  string id = 1;
+}

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+import "grpc/news/proto/msg/news_view.proto";
+
+message NewsViewResp {
+  int32 code = 1;
+  string msg = 2;
+  NewsView news = 3;
+}
+
+message ListNewsViewResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated NewsView news = 3;
+}
+

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message AdminSearchRelatedNewsReq {
+  repeated string tags = 1;
+  string title = 2;
+  string content = 3;
+  int32 category = 4;
+  int32 sub_category = 5;
+  string publishBy = 6;
+  string from = 7;
+  string to = 8;
+  int32 offset = 9;
+  int32 limit = 10;
+}

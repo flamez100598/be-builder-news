@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message NewsUrl {
+  string id = 1;
+  string newsSlug = 2;
+  string categorySlug = 3;
+}
+
+message NewsUrlsResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated NewsUrl urls = 3;
+}

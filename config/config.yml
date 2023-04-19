@@ -1,0 +1,11 @@
+# Server settings
+server:
+  name: news
+  host: 'localhost'
+  port: ':8084'
+kafka:
+  topic:
+    updateUser: updateUser
+  brokers:
+    - kafka:9092
+  groupId: news

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message SearchNewsReq {
+  string keywords = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+}

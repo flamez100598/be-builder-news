@@ -1,0 +1,60 @@
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  image: golang:1.18.1-stretch
+  script:
+    - apt update
+    # - cd $HOME
+    - curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protoc-3.15.8-linux-x86_64.zip
+    - apt install unzip
+    - unzip protoc-3.15.8-linux-x86_64.zip -d $HOME/.local
+    - go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26
+    - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1
+    - rm go.mod
+    - rm go.sum
+    - go mod init lykafe/news
+    - go get gopkg.in/yaml.v3
+    - go get github.com/golang-jwt/jwt/v4
+    - go get github.com/kelseyhightower/envconfig
+    - export PATH="$PATH:$HOME/.local/bin"
+    - export PATH="$PATH:$(go env GOPATH)/bin"
+    - protoc --go_out=. --go_opt=paths=import --go-grpc_out=. --go-grpc_opt=paths=import grpc/news/proto/*.proto --go-grpc_opt=paths=import grpc/news/proto/msg/*.proto
+    - go get google.golang.org/grpc
+    - go get google.golang.org/grpc/codes
+    - go get google.golang.org/grpc/status
+    - go get google.golang.org/protobuf/reflect/protoreflect
+    - go get google.golang.org/protobuf/runtime/protoimpl
+    - go mod download github.com/golang/protobuf
+    - go get github.com/google/uuid
+    - go get github.com/go-sql-driver/mysql
+    - go get github.com/segmentio/kafka-go
+    - go mod tidy
+    - env GOOS=linux GOARCH=amd64 go build -o ./app_main main.go
+  artifacts:
+    expire_in: 1 hours
+    paths:
+      - ./app_main
+  only:
+    - master
+  tags:
+    - v2bcryptohub-news-prod
+  when: manual
+
+deploy:
+  stage: deploy
+  image: docker:dind
+  script:
+    - docker stop be-news
+    - docker rm be-news
+    - docker rmi be/news
+    - docker build -t be/news .
+    - docker run -d --name=be-news --network=host -p 8084:8084 --restart unless-stopped be/news
+    # - docker run -d --name=be-news -p 8081:8081 --restart unless-stopped be/news
+  tags:
+    - v2bcryptohub-news-prod
+  only:
+    - master
+  when: manual

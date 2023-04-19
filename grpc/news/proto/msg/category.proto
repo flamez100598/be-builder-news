@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message Category {
+  int32 id = 1;
+  int32 parentId = 2;
+  string name = 3;
+  string description = 4;
+  string slug = 5;
+  int32 newsCount = 6;
+  int32 status = 7;
+  int32 order = 8;
+}
+
+message CategoryResp {
+  int32 code = 1;
+  string msg = 2;
+  Category category = 3;
+}
+
+message CategoriesReq {
+  repeated Category categories = 1;
+}
+
+message CategoriesResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated Category categories = 3;
+}

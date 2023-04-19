@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message Subscription {
+  string email = 1;
+  string name = 2;
+  string createdAt = 3;
+  int32 status = 4;
+}
+
+message SearchSubscriptionReq {
+  string email = 1;
+  int32 status = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+}
+
+message SubscriptionResp {
+  int32 code = 1;
+  string msg = 2;
+  Subscription subscription = 3;
+}
+
+message SubscriptionsResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated Subscription subscriptions = 3;
+}
+

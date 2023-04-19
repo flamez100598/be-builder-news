@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message PublishNewsReq {
+  string title = 1;
+  string content = 2;
+  string description = 3;
+  string imgUrl = 4;
+  string metaKw = 5;
+  string metaDesc = 6;
+  string publishBy = 7;
+  int32 category = 8;
+  int32 subCategory = 9;
+  bool isFeatured = 10;
+  bool isHot = 11;
+  bool isTrending = 12;
+  repeated string related = 13;
+  repeated string tags = 14;
+  string slug = 15;
+  string slugExt = 16;
+  string publishAt = 17;
+  string id = 18;
+  string authorId = 19;
+}

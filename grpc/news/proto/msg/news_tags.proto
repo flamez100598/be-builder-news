@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message NewsTagReq {
+  string tag = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+  bool includeDeleted = 4;
+}
+
+message NewsTagsReq {
+  repeated string tags = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+}
+
+message NewsTagsResp {
+  int32 code = 1;
+  string msg = 2;
+  repeated string tags = 3;
+}

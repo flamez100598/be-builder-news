@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message NewsCategoryReq {
+  int32 categoryId = 1;
+  bool includeSubs = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+}

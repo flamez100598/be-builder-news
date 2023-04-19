@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "grpc/news/pb";
+
+package pb;
+
+message NewsCountResp {
+  int32 code = 1;
+  string msg = 2;
+  int32 count = 3;
+}
