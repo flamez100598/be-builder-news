@@ -7,5 +7,5 @@ kafka:
   topic:
     updateUser: updateUser
   brokers:
-    - localhost:9092
+    - 103.57.223.222:9092
   groupId: news

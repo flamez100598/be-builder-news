@@ -101,7 +101,7 @@ func NewNewsRepo() *NewsRepo {
 		log.Fatal("[DEBUG] Cannot prepare searchNews ", err)
 	}
 
-	searchNewsCount, err := db.Prepare("SELECT COUNT(n.`id`) AS c FROM news as n WHERE (n.title LIKE CONCAT('%', ?, '%') OR n.content LIKE CONCAT('%', ?, '%'), OR n.content_jp LIKE CONCAT('%', ?, '%')) AND n.published_at <= NOW() AND n.status <> 3")
+	searchNewsCount, err := db.Prepare("SELECT COUNT(n.`id`) AS c FROM news as n WHERE (n.title LIKE CONCAT('%', ?, '%') OR n.content LIKE CONCAT('%', ?, '%') OR n.content_jp LIKE CONCAT('%', ?, '%')) AND n.published_at <= NOW() AND n.status <> 3")
 	if err != nil {
 		log.Fatal("[DEBUG] Cannot prepare searchNewsCount ", err)
 	}
