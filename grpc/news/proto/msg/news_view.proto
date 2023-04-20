@@ -33,4 +33,7 @@ message NewsView {
   string usernameUpdateBy = 24;
   string nameUpdateBy = 25;
   string avatarUpdateBy = 26;
+
+  string contentJp = 27;
+  string descriptionJp = 28;
 }

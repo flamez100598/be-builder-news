@@ -24,4 +24,7 @@ message News {
   string createdAt = 17;
   string updatedAt = 18;
   string publishedAt = 19;
+  
+  string contentJp = 20;
+  string descriptionJp = 21;
 }

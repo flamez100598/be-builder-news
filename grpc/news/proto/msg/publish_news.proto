@@ -24,4 +24,7 @@ message PublishNewsReq {
   string publishAt = 17;
   string id = 18;
   string authorId = 19;
+
+  string contentJp = 20;
+  string descriptionJp = 21;
 }
