@@ -53,11 +53,11 @@ func NewNewsRepo() *NewsRepo {
 	if err != nil {
 		log.Fatal("[DEBUG] Cannot prepare getListFeaturedNews ", err)
 	}
-	getNewsBySlug, err := db.Prepare("SELECT HEX(n.`id`), `title`, `content`, `content_jp`, `description`, `description_jp`, `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE slug=? AND n.published_at <= NOW() AND n.status <> 3")
+	getNewsBySlug, err := db.Prepare("SELECT HEX(n.`id`), `title`, `content`, IFNULL(`content_jp`, '') as `content_jp`, `description`, IFNULL(`description_jp`, '') as `description_jp`, `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE slug=? AND n.published_at <= NOW() AND n.status <> 3")
 	if err != nil {
 		log.Fatal("[DEBUG] Cannot prepare getNewsBySlug ", err)
 	}
-	getNewsById, err := db.Prepare("SELECT HEX(n.`id`), `title`, `content`, `content_jp`, `description`, `description_jp`, `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE n.`id`=UNHEX(?)")
+	getNewsById, err := db.Prepare("SELECT HEX(n.`id`), `title`, `content`, IFNULL(`content_jp`, '') as `content_jp`, `description`, IFNULL(`description_jp`, '') as `description_jp`, `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE n.`id`=UNHEX(?)")
 	if err != nil {
 		log.Fatal("[DEBUG] Cannot prepare getNewsById ", err)
 	}
