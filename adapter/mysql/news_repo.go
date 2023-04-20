@@ -96,7 +96,7 @@ func NewNewsRepo() *NewsRepo {
 		log.Fatal("[DEBUG] Cannot prepare adminSearchRelatedNewsCount ", err)
 	}
 
-	searchNews, err := db.Prepare("SELECT HEX(n.`id`), `title`, `description`, `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE (n.title LIKE CONCAT('%', ?, '%') OR n.content LIKE CONCAT('%', ?, '%') OR n.content_jp LIKE CONCAT('%', ?, '%')) AND n.published_at <= NOW() AND n.status <> 3 ORDER BY n.id DESC LIMIT ?, ?")
+	searchNews, err := db.Prepare("SELECT HEX(n.`id`), `title`, `description`, IFNULL(`description_jp`, ''), `img_url`, `meta_kw`, `meta_desc`, `slug`, `category`, `sub_category`, `comment_num`, `vote_num`, `view_num`, `status`, HEX(`publish_by`), `ranking`, n.`created_at`, `updated_at`, `published_at`, `username` as `username_publish_by`, `name` as `name_publish_by`, avatar as `avatar_publish_by` FROM news as n INNER JOIN user as u ON u.id=n.publish_by WHERE (n.title LIKE CONCAT('%', ?, '%') OR n.content LIKE CONCAT('%', ?, '%') OR n.content_jp LIKE CONCAT('%', ?, '%')) AND n.published_at <= NOW() AND n.status <> 3 ORDER BY n.id DESC LIMIT ?, ?")
 	if err != nil {
 		log.Fatal("[DEBUG] Cannot prepare searchNews ", err)
 	}
@@ -461,7 +461,7 @@ func (n *NewsRepo) AdminSearchRelatedNewsCount(req *dto.AdminSearchRelatedNewsRe
 }
 
 func (n *NewsRepo) SearchNews(req *dto.SearchNewsReq) ([]*model.NewsView, error) {
-	rows, err := n.searchNews.Query(req.Keywords, req.Keywords, req.Offset, req.Limit)
+	rows, err := n.searchNews.Query(req.Keywords, req.Keywords, req.Keywords, req.Offset, req.Limit)
 	if err != nil {
 		log.Println("[DEBUG] searchNews err: ", err)
 		return nil, err
@@ -473,7 +473,7 @@ func (n *NewsRepo) SearchNews(req *dto.SearchNewsReq) ([]*model.NewsView, error)
 		var createdAt []uint8
 		var updatedAt []uint8
 		var publishedAt []uint8
-		err = rows.Scan(&nv.Id, &nv.Title, &nv.Description, &nv.ImgUrl, &nv.MetaKw, &nv.MetaDesc, &nv.Slug, &nv.Category, &nv.SubCategory, &nv.CommentNum, &nv.VoteNum, &nv.ViewNum, &nv.Status, &nv.PublishBy, &nv.Ranking, &createdAt, &updatedAt, &publishedAt, &nv.UsernamePublishBy, &nv.NamePublishBy, &nv.AvatarPublishBy)
+		err = rows.Scan(&nv.Id, &nv.Title, &nv.Description, &nv.DescriptionJp, &nv.ImgUrl, &nv.MetaKw, &nv.MetaDesc, &nv.Slug, &nv.Category, &nv.SubCategory, &nv.CommentNum, &nv.VoteNum, &nv.ViewNum, &nv.Status, &nv.PublishBy, &nv.Ranking, &createdAt, &updatedAt, &publishedAt, &nv.UsernamePublishBy, &nv.NamePublishBy, &nv.AvatarPublishBy)
 		if err != nil {
 			return nil, err
 		}
